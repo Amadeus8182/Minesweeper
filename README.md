@@ -1,6 +1,6 @@
 # Minesweeper
 Minesweeper written in Java using Swing.  
-![A demo of Minesweeper.](/demo.png "demo")
+<img src="./demo.png" width="500" height="341">
 
 ## Play
 To play using the graphical interface:
