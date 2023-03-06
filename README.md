@@ -16,4 +16,12 @@ javac Minesweeper.java
 java Minesweeper
 ```
 
+## TODO:
+Priority:  
+[ ] - Flagging mechanic.  
+[ ] - Custom difficulty.
+
+Extras:  
+[ ] - Sound effects.
+
 
