@@ -8,6 +8,8 @@ public class Minesweeper {
 
 	public final Map<Coord, Integer> tiles;
 	public final Set<Coord> revealedTiles;
+	public final Set<Coord> flaggedTiles;
+
 	private Coord wrongBomb;
 	final static int LOST = -1;
 	final static int WON = 1;
@@ -81,6 +83,20 @@ public class Minesweeper {
 		if(tiles.isEmpty()) setBombs(x, y, NUM_BOMBS);
 		sweep(x, y);
 		checkWin();
+	}
+
+	public void flagTile(int x, int y) {
+		if(tiles.isEmpty()) setBombs(x, y, NUM_BOMBS);
+		Coord c = new Coord(x, y);
+
+		/* If it's already been revealed, you can't set it as a flag */
+		if(revealedTiles,contains(c)) return;
+
+		if(!flaggedTiles.contains(c)) {
+			flaggedTiles.add(c);
+		} else {
+			flaggedTiles.remove(c);
+		}
 	}
 
 	/* Horrible hacky code to properly align the grid and coordinates that can handle any size */
@@ -166,6 +182,12 @@ public class Minesweeper {
 	private void sweep(int x, int y) {
 		Coord c = new Coord(x, y);
 		setState(c);
+
+		/* Do nothing if it's flagged */
+		if(flaggedTiles.contains(c)) {
+			return;
+		}
+
 		/* Check if it is bomb */
 		if(tiles.containsKey(c) && tiles.get(c) == -1) {
 			gameState = LOST;
