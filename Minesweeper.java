@@ -15,7 +15,7 @@ public class Minesweeper {
 	private int gameState = 0;
 
 	public Minesweeper(int width, int height, int bombs) {
-		if(width <= 3 && height <=3) throw new IllegalArgumentException("Please use an area larger than 3x3");
+		if(width <= 8 && height <=1) throw new IllegalArgumentException("Please use an area larger than 8x1");
 		SIZE_X = width;
 		SIZE_Y = height;
 		NUM_BOMBS = bombs;
