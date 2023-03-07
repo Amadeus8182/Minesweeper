@@ -20,6 +20,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 	private int gameBomb = 40;
 
 	/* Mouse Stuff */
+	boolean mouseLeftClick = false;
 	boolean mouseDown = false;
 	int mouseX = 0;
 	int mouseY = 0;
@@ -94,7 +95,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 	}
 
 	private void drawPressedTile(int mX, int mY) {
-		if(!mouseDown || game.getState() != Minesweeper.ONGOING)
+		if(!mouseDown || !mouseLeftClick || game.getState() != Minesweeper.ONGOING)
 			return;
 
 		int RIGHT_BOUND = getWidth()-RIGHT_PAD-1;
@@ -166,7 +167,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		final int OFFSET = 4;
 		int x = (int)(BORDER_LEFT_PAD+OFFSET+(sX-8)/2.0*TILE_SIZE);
 		int y = 16;
-		if(mouseDown) {
+		if(mouseDown && mouseLeftClick) {
 			if(withinBounds(mouseX, mouseY, x, x+FACE_SIZE, y, y+FACE_SIZE)) {
 				g2.drawImage(faceSmilePressed, x, y, this);
 				return;
@@ -310,11 +311,14 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 	public void mouseReleased(MouseEvent e) {
 		mouseDown = false;
+		mouseLeftClick = SwingUtilities.isLeftMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
 
-		playTile(mouseX, mouseY);
-		resetGame(mouseX, mouseY);
+		if(mouseLeftClick) {
+			playTile(mouseX, mouseY);
+			resetGame(mouseX, mouseY);
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
