@@ -333,22 +333,24 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 	public void mouseReleased(MouseEvent e) {
 		mouseDown = false;
-		mouseLeftClick = SwingUtilities.isLeftMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
 
 		if(mouseLeftClick) {
 			revealTile(mouseX, mouseY);
 			resetGame(mouseX, mouseY);
-		} else {
-			flagTile(mouseX, mouseY);
 		}
 	}
 
 	public void mousePressed(MouseEvent e) {
 		mouseDown = true;
+		mouseLeftClick = SwingUtilities.isLeftMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
+		
+		if(!mouseLeftClick) {
+			flagTile(mouseX, mouseY);
+		}
 	}
 
 	public void mouseDragged(MouseEvent e) {
