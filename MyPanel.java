@@ -20,7 +20,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 	private int gameBomb = 40;
 
 	/* Mouse Stuff */
-	boolean mouseLeftClick = false;
+	boolean mouseLeftClick = false; // if false, mouse right clicked
 	boolean mouseDown = false;
 	int mouseX = 0;
 	int mouseY = 0;
@@ -64,10 +64,16 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 		drawBlank(game.SIZE_X, game.SIZE_Y);
 		drawPressedTile(mouseX, mouseY);
-		drawBoard(game.revealedTiles, game.tiles);
+		drawBoard(game.revealedTiles, game.flaggedTiles, game.tiles);
 	}
 
-	private void drawBoard(Set<Coord> revealed, Map<Coord, Integer> values) {
+	private void drawBoard(Set<Coord> revealed, Set<Coord> flagged, Map<Coord, Integer> values) {
+		for(Coord c : flagged) {
+			int x = c.getX();
+			int y = c.getY();
+			drawTile(x, y, flaggedTile);
+		}
+
 		for(Coord c : revealed) {
 			int v = values.get(c);
 			int x = c.getX();
@@ -199,7 +205,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
-	private void playTile(int mX, int mY) {
+	private void revealTile(int mX, int mY) {
 		int RIGHT_BOUND = getWidth()-RIGHT_PAD-1;
 		int BOT_BOUND = getHeight()-BOT_PAD-1;
 
@@ -217,6 +223,21 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		return;
 	}
 
+	private void flagTile(int mX, int mY) {	
+		int RIGHT_BOUND = getWidth()-RIGHT_PAD-1;
+		int BOT_BOUND = getHeight()-BOT_PAD-1;
+
+		if(!withinBounds(mX, mY, LEFT_PAD, RIGHT_BOUND, TOP_PAD, BOT_BOUND))
+			return;
+		
+		if(game.getState() != Minesweeper.ONGOING)
+			return;
+
+		Coord c = mouseToCoord(mX, mY);
+		game.flagTile(c.getX(), c.getY());
+	}
+
+	/* This is for the user clicking on the face */
 	private void resetGame(int mx, int my) {
 		final int BORDER_LEFT_PAD = borderStatLeft.getWidth();
 		final int OFFSET = 4;
@@ -231,6 +252,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
+	/* This is for the MyFrame class for when the user changes the difficulty */
 	public void resetGame() {
 		game = new Minesweeper(gameWidth, gameHeight, gameBomb);
 		setWindowSize(game.SIZE_X, game.SIZE_Y);
@@ -316,8 +338,10 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		mouseY = e.getY();
 
 		if(mouseLeftClick) {
-			playTile(mouseX, mouseY);
+			revealTile(mouseX, mouseY);
 			resetGame(mouseX, mouseY);
+		} else {
+			flagTile(mouseX, mouseY);
 		}
 	}
 
