@@ -113,6 +113,8 @@ public class Minesweeper {
 					if(tiles.get(c) > 0) out += String.format("%-"+(xDigitLength+1)+"d", tiles.get(c)); 
 					else if(tiles.get(c) == -1) out += String.format("%-"+(xDigitLength+1)+"s", "b");
 					else out += String.format("%-"+(xDigitLength+1)+"s", ".");
+				} else if(c.equals(wrongBomb)) {
+					out += String.format("%-"+(xDigitLength+1)+"s", "B"); 
 				} else {
 					out += String.format("%-"+(xDigitLength+1)+"s", "x");
 				}
