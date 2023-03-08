@@ -22,8 +22,9 @@ public class Minesweeper {
 		NUM_BOMBS = bombs;
 		if(SIZE_X <= 8 && SIZE_Y <=1) throw new IllegalArgumentException("Please use an area larger than 8x1");
 		if(NUM_BOMBS >= SIZE_X*SIZE_Y) throw new IllegalArgumentException("Cannot have more bombs than there are tiles");
-		revealedTiles = new HashSet<Coord>();
 		tiles = new HashMap<Coord, Integer>();
+		revealedTiles = new HashSet<Coord>();
+		flaggedTiles = new HashSet<Coord>();
 	}
 
 	public Minesweeper() {
@@ -51,28 +52,42 @@ public class Minesweeper {
 	 */
 	public void play() {
 		Scanner s = new Scanner(System.in);
+		boolean reveal = false;	// If false, tile will be flagged
 		int x, y;
 		while(true) {
-			try{
-				System.out.print("Enter x coordinate to reveal: ");
-				x = Integer.parseInt(s.nextLine()) - 1;
-				if(x < 0 || x >= SIZE_X) {
-					System.out.println("Please enter a valid x-coordinate.");
-					continue;
-				}
+			System.out.println("Flag or Reveal? (F/R)");
+			String inp = s.nextLine().toUpperCase();
 
-				System.out.print("Enter y coordinate to reveal: ");
-				y = Integer.parseInt(s.nextLine()) - 1;
-				if(y < 0 || y >= SIZE_Y) {
-					System.out.println("Please enter a valid y-coordinate.");
-					continue;
+			if(!(inp.equals("F") || inp.equals("R"))) {
+				System.out.println("Please choose a valid choice. (F/R)");
+				continue;
+			}
+
+			reveal = inp.equals("R");
+
+			try {
+				/* x-coordinate */
+				System.out.println("Enter an x-coordinate: ");
+				x = Integer.parseInt(s.nextLine());
+				if(!(0 < x && x <= SIZE_X)) {
+					System.out.println("Enter a valid x-coordinate.");
+				}
+				
+				/* y-coordinate */
+				System.out.println("Enter an y-coordinate: ");
+				y = Integer.parseInt(s.nextLine());
+				if(!(0 < y && y <= SIZE_Y)) {
+					System.out.println("Enter a valid y-coordinate.");
 				}
 				break;
 			} catch(Exception e) {
-				System.out.println("Please enter an integer.");
+				System.out.println("Please enter a valid integer.");
 			}
 		}
-		revealTile(x, y);
+		if(reveal)
+			revealTile(x-1, y-1);
+		else
+			flagTile(x-1, y-1);
 	}
 
 	public int getState() {return gameState;}
@@ -90,7 +105,7 @@ public class Minesweeper {
 		Coord c = new Coord(x, y);
 
 		/* If it's already been revealed, you can't set it as a flag */
-		if(revealedTiles,contains(c)) return;
+		if(revealedTiles.contains(c)) return;
 
 		if(!flaggedTiles.contains(c)) {
 			flaggedTiles.add(c);
@@ -125,7 +140,9 @@ public class Minesweeper {
 			/* Board */
 			for(int x = 0; x < SIZE_X; x++) {
 				Coord c = new Coord(x, y);
-				if(revealedTiles.contains(c)) {
+				if(flaggedTiles.contains(c)) {
+					out += String.format("%-"+(xDigitLength+1)+"s", "F"); 
+				} else if(revealedTiles.contains(c)) {
 					if(tiles.get(c) > 0) out += String.format("%-"+(xDigitLength+1)+"d", tiles.get(c)); 
 					else if(tiles.get(c) == -1) out += String.format("%-"+(xDigitLength+1)+"s", "b");
 					else out += String.format("%-"+(xDigitLength+1)+"s", ".");
@@ -192,6 +209,7 @@ public class Minesweeper {
 		if(tiles.containsKey(c) && tiles.get(c) == -1) {
 			gameState = LOST;
 			wrongBomb = c;
+			flaggedTiles.clear();
 			for(Coord oC : tiles.keySet()) {
 				if(oC.equals(wrongBomb))
 					continue;
@@ -225,6 +243,9 @@ public class Minesweeper {
 			for(Coord edge : edges) {
 				/* Skip if it's already been explored */
 				if(explored.contains(edge)) continue;
+
+				/* Skip if it's flagged */
+				if(flaggedTiles.contains(edge)) continue;
 
 				/* Skip if it's out of bounds */	
 				int edgeX = edge.getX();
