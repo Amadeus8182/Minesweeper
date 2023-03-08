@@ -18,7 +18,7 @@ java Minesweeper
 
 ## TODO:
 Priority:  
-[ ] - Flagging mechanic.  
+[X] - Flagging mechanic.  
 [ ] - Custom difficulty.
 
 Extras:  
