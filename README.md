@@ -24,7 +24,7 @@ Priority:
 Extras:  
 [ ] - Sound effects.
 
-Known Issues:
+Known Issues:  
 [ ] - Bomb generation will not work properly if there are too many bombs.  
 
 
