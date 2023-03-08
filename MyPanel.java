@@ -41,7 +41,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 	BufferedImage[] numDisp = new BufferedImage[10];
 	BufferedImage blankDisp, negativeDisp;
 	BufferedImage[] tiles = new BufferedImage[9];
-	BufferedImage unrevealedTile, flaggedTile;
+	BufferedImage unrevealedTile, flaggedTile, wrongFlagTile;
 	BufferedImage revealedBomb, bomb;
 	BufferedImage borderLeft, borderRight, borderBotLeft, borderBotRight, borderBot;
 	BufferedImage borderStatLeft, borderStatRight, borderStatMid, borderStatFill;
@@ -305,6 +305,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			}
 			unrevealedTile = ImageIO.read(new File("./Textures/tiles/unrevealed.png"));
 			flaggedTile = ImageIO.read(new File("./Textures/tiles/flagged.png"));
+			wrongFlagTile = ImageIO.read(new File("./Textures/tiles/wrongflag.png"));
 			
 			/* Bombs */
 			bomb = ImageIO.read(new File("./Textures/tiles/bomb.png"));
