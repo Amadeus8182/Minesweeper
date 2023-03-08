@@ -72,6 +72,10 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		for(Coord c : flagged) {
 			int x = c.getX();
 			int y = c.getY();
+			if(game.getState() == Minesweeper.LOST && !values.containsKey(c)) {
+				drawTile(x, y, wrongFlagTile);
+				continue;
+			}
 			drawTile(x, y, flaggedTile);
 		}
 
@@ -82,14 +86,21 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			if(v >= 0) drawTile(x, y, tiles[v]);
 			if(v == -1) {
 				if(game.getState() == Minesweeper.LOST) {
-					drawTile(x, y, bomb);
+					if(flagged.contains(c)) {
+						drawTile(x, y, flaggedTile);
+					} else {
+						drawTile(x, y, bomb);
+					}
 
-					Coord wB = game.getWrongBomb();
-					drawTile(wB.getX(), wB.getY(), revealedBomb);
-				}
-				if(game.getState() == Minesweeper.WON)
+				} else if(game.getState() == Minesweeper.WON) {
 					drawTile(x, y, flaggedTile);
+				}
 			}
+		}
+
+		if(game.getState() == Minesweeper.LOST) {
+			Coord wB = game.getWrongBomb();
+			drawTile(wB.getX(), wB.getY(), revealedBomb);
 		}
 	}
 

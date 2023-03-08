@@ -208,7 +208,6 @@ public class Minesweeper {
 		if(tiles.containsKey(c) && tiles.get(c) == -1) {
 			gameState = LOST;
 			wrongBomb = c;
-			flaggedTiles.clear();
 			for(Coord oC : tiles.keySet()) {
 				if(oC.equals(wrongBomb))
 					continue;
