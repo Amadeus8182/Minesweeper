@@ -20,7 +20,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 	private int gameBomb = 40;
 
 	/* Mouse Stuff */
-	boolean mouseLeftClick = false;
+	boolean mouseLeftClick = false; // if false, mouse right clicked
 	boolean mouseDown = false;
 	int mouseX = 0;
 	int mouseY = 0;
@@ -39,9 +39,9 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 	/* Textures */
 	BufferedImage[] numDisp = new BufferedImage[10];
-	BufferedImage blankDisp;
+	BufferedImage blankDisp, negativeDisp;
 	BufferedImage[] tiles = new BufferedImage[9];
-	BufferedImage unrevealedTile, flaggedTile;
+	BufferedImage unrevealedTile, flaggedTile, wrongFlagTile;
 	BufferedImage revealedBomb, bomb;
 	BufferedImage borderLeft, borderRight, borderBotLeft, borderBotRight, borderBot;
 	BufferedImage borderStatLeft, borderStatRight, borderStatMid, borderStatFill;
@@ -61,13 +61,24 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		drawBorderStat(game.SIZE_X);
 		drawStateFace(game.SIZE_X, game.getState());
 		drawTime(elapsedTime);
+		drawFlagsLeft(game.NUM_BOMBS, game.flaggedTiles.size());
 
 		drawBlank(game.SIZE_X, game.SIZE_Y);
 		drawPressedTile(mouseX, mouseY);
-		drawBoard(game.revealedTiles, game.tiles);
+		drawBoard(game.revealedTiles, game.flaggedTiles, game.tiles);
 	}
 
-	private void drawBoard(Set<Coord> revealed, Map<Coord, Integer> values) {
+	private void drawBoard(Set<Coord> revealed, Set<Coord> flagged, Map<Coord, Integer> values) {
+		for(Coord c : flagged) {
+			int x = c.getX();
+			int y = c.getY();
+			if(game.getState() == Minesweeper.LOST && !values.containsKey(c)) {
+				drawTile(x, y, wrongFlagTile);
+				continue;
+			}
+			drawTile(x, y, flaggedTile);
+		}
+
 		for(Coord c : revealed) {
 			int v = values.get(c);
 			int x = c.getX();
@@ -75,14 +86,21 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			if(v >= 0) drawTile(x, y, tiles[v]);
 			if(v == -1) {
 				if(game.getState() == Minesweeper.LOST) {
-					drawTile(x, y, bomb);
+					if(flagged.contains(c)) {
+						drawTile(x, y, flaggedTile);
+					} else {
+						drawTile(x, y, bomb);
+					}
 
-					Coord wB = game.getWrongBomb();
-					drawTile(wB.getX(), wB.getY(), revealedBomb);
-				}
-				if(game.getState() == Minesweeper.WON)
+				} else if(game.getState() == Minesweeper.WON) {
 					drawTile(x, y, flaggedTile);
+				}
 			}
+		}
+
+		if(game.getState() == Minesweeper.LOST) {
+			Coord wB = game.getWrongBomb();
+			drawTile(wB.getX(), wB.getY(), revealedBomb);
 		}
 	}
 
@@ -151,15 +169,6 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			g2.drawImage(borderStatFill, leftX,  0, this);
 			g2.drawImage(borderStatFill, rightX, 0, this);
 		}
-
-		/* Draw Blank Numbers for the flags */
-		final int NUMBER_LEFT_PAD = 17;
-		for(int i = 0; i < 3; i++) {
-			int x = NUMBER_LEFT_PAD+i*NUMBER_WIDTH;
-			g2.drawImage(blankDisp, x, 16, this);
-		}
-
-
 	}
 
 	private void drawStateFace(int sX, int state){
@@ -199,7 +208,23 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
-	private void playTile(int mX, int mY) {
+	private void drawFlagsLeft(int bombs, int flags) {
+		int left = bombs-flags;
+		String[] out = String.format("%03d", Math.abs(left)).split("");
+		final int NUMBER_LEFT_PAD = 17;
+		
+		for(int i = 0; i < out.length; i++) {
+			int n = Integer.parseInt(out[i]);
+			int x = NUMBER_LEFT_PAD+NUMBER_WIDTH*i;
+			g2.drawImage(numDisp[n], x, 16, this);
+		}
+
+		if(left < 0) {
+			g2.drawImage(negativeDisp, NUMBER_LEFT_PAD, 16, this);
+		}
+	}
+
+	private void revealTile(int mX, int mY) {
 		int RIGHT_BOUND = getWidth()-RIGHT_PAD-1;
 		int BOT_BOUND = getHeight()-BOT_PAD-1;
 
@@ -217,6 +242,21 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		return;
 	}
 
+	private void flagTile(int mX, int mY) {	
+		int RIGHT_BOUND = getWidth()-RIGHT_PAD-1;
+		int BOT_BOUND = getHeight()-BOT_PAD-1;
+
+		if(!withinBounds(mX, mY, LEFT_PAD, RIGHT_BOUND, TOP_PAD, BOT_BOUND))
+			return;
+		
+		if(game.getState() != Minesweeper.ONGOING)
+			return;
+
+		Coord c = mouseToCoord(mX, mY);
+		game.flagTile(c.getX(), c.getY());
+	}
+
+	/* This is for the user clicking on the face */
 	private void resetGame(int mx, int my) {
 		final int BORDER_LEFT_PAD = borderStatLeft.getWidth();
 		final int OFFSET = 4;
@@ -231,6 +271,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		}
 	}
 
+	/* This is for the MyFrame class for when the user changes the difficulty */
 	public void resetGame() {
 		game = new Minesweeper(gameWidth, gameHeight, gameBomb);
 		setWindowSize(game.SIZE_X, game.SIZE_Y);
@@ -267,6 +308,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 				numDisp[i] = ImageIO.read(new File("./Textures/numbers/"+i+".png"));
 			}
 			blankDisp = ImageIO.read(new File("./Textures/numbers/blank.png"));
+			negativeDisp = ImageIO.read(new File("./Textures/numbers/negative.png"));
 
 			/* Tiles */
 			for(int i = 0; i < tiles.length; i++) {
@@ -274,6 +316,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			}
 			unrevealedTile = ImageIO.read(new File("./Textures/tiles/unrevealed.png"));
 			flaggedTile = ImageIO.read(new File("./Textures/tiles/flagged.png"));
+			wrongFlagTile = ImageIO.read(new File("./Textures/tiles/wrongflag.png"));
 			
 			/* Bombs */
 			bomb = ImageIO.read(new File("./Textures/tiles/bomb.png"));
@@ -311,20 +354,24 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 	public void mouseReleased(MouseEvent e) {
 		mouseDown = false;
-		mouseLeftClick = SwingUtilities.isLeftMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
 
 		if(mouseLeftClick) {
-			playTile(mouseX, mouseY);
+			revealTile(mouseX, mouseY);
 			resetGame(mouseX, mouseY);
 		}
 	}
 
 	public void mousePressed(MouseEvent e) {
 		mouseDown = true;
+		mouseLeftClick = SwingUtilities.isLeftMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
+		
+		if(!mouseLeftClick) {
+			flagTile(mouseX, mouseY);
+		}
 	}
 
 	public void mouseDragged(MouseEvent e) {
