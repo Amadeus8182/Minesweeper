@@ -101,7 +101,6 @@ public class Minesweeper {
 	}
 
 	public void flagTile(int x, int y) {
-		if(tiles.isEmpty()) setBombs(x, y, NUM_BOMBS);
 		Coord c = new Coord(x, y);
 
 		/* If it's already been revealed, you can't set it as a flag */
