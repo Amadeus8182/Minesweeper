@@ -39,7 +39,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 
 	/* Textures */
 	BufferedImage[] numDisp = new BufferedImage[10];
-	BufferedImage blankDisp;
+	BufferedImage blankDisp, negativeDisp;
 	BufferedImage[] tiles = new BufferedImage[9];
 	BufferedImage unrevealedTile, flaggedTile;
 	BufferedImage revealedBomb, bomb;
@@ -61,6 +61,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 		drawBorderStat(game.SIZE_X);
 		drawStateFace(game.SIZE_X, game.getState());
 		drawTime(elapsedTime);
+		drawFlagsLeft(game.NUM_BOMBS, game.flaggedTiles.size());
 
 		drawBlank(game.SIZE_X, game.SIZE_Y);
 		drawPressedTile(mouseX, mouseY);
@@ -157,15 +158,6 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			g2.drawImage(borderStatFill, leftX,  0, this);
 			g2.drawImage(borderStatFill, rightX, 0, this);
 		}
-
-		/* Draw Blank Numbers for the flags */
-		final int NUMBER_LEFT_PAD = 17;
-		for(int i = 0; i < 3; i++) {
-			int x = NUMBER_LEFT_PAD+i*NUMBER_WIDTH;
-			g2.drawImage(blankDisp, x, 16, this);
-		}
-
-
 	}
 
 	private void drawStateFace(int sX, int state){
@@ -202,6 +194,22 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 			int n = Integer.parseInt(out[i]);
 			int x = getWidth()-(NUMBER_RIGHT_PAD+NUMBER_WIDTH*(3-i));
 			g2.drawImage(numDisp[n], x, 16, this);
+		}
+	}
+
+	private void drawFlagsLeft(int bombs, int flags) {
+		int left = bombs-flags;
+		String[] out = String.format("%03d", Math.abs(left)).split("");
+		final int NUMBER_LEFT_PAD = 17;
+		
+		for(int i = 0; i < out.length; i++) {
+			int n = Integer.parseInt(out[i]);
+			int x = NUMBER_LEFT_PAD+NUMBER_WIDTH*i;
+			g2.drawImage(numDisp[n], x, 16, this);
+		}
+
+		if(left < 0) {
+			g2.drawImage(negativeDisp, NUMBER_LEFT_PAD, 16, this);
 		}
 	}
 
@@ -289,6 +297,7 @@ public class MyPanel extends JPanel implements MouseListener, MouseMotionListene
 				numDisp[i] = ImageIO.read(new File("./Textures/numbers/"+i+".png"));
 			}
 			blankDisp = ImageIO.read(new File("./Textures/numbers/blank.png"));
+			negativeDisp = ImageIO.read(new File("./Textures/numbers/negative.png"));
 
 			/* Tiles */
 			for(int i = 0; i < tiles.length; i++) {
