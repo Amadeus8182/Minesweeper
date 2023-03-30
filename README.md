@@ -3,19 +3,20 @@ Minesweeper clone written in Java using Swing.
 <img src="./demo.png" width="500" height="341">
 
 ## Play
-To play using the graphical interface:
+It must be built and compiled from source. You can either play using the terminal or with the GUI.
 ```
+# Clone the repo
+git clone https://github.com/amadeus8182/Minesweeper.git
+cd Minesweeper
+
+# To play using the terminal
+javac Minesweeper.java
+java Minesweeper
+
+# To play with the Graphical User Interface
 javac MinesweeperGUI.java
 java MinesweeperGUI
 ```
-
-## Terminal
-To play using the terminal:
-```
-javac Minesweeper.java
-java Minesweeper
-```
-
 ## TODO:
 Priority:  
 [X] - Flagging mechanic.  
